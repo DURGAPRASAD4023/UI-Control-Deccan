@@ -1,42 +1,193 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* Add this to your App.css or a global stylesheet */
+pre {
+  white-space: pre-wrap;       
+  word-break: break-all;     
+  background-color: #f0f0f0;  
+  padding: 1rem;
+  border-radius: 8px;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  max-height: 275px; /* Set a maximum height */
+  overflow-y: auto;   /* Add a vertical scrollbar when content exceeds the max-height */
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.container {
+  min-height: calc(100vh - 124px);
+  padding: 1rem 0;
 }
 
 .card {
-  padding: 2em;
+  background-color: var(--card-background-color);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 12px var(--shadow-color);
+  margin-bottom: 2rem;
+  border: 1px solid var(--border-color);
 }
 
-.read-the-docs {
-  color: #888;
+.file-inputs {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.file-input-container input[type="file"] {
+  display: none;
+}
+
+.file-label {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+}
+
+.file-label:hover {
+  background-color: #5a52e0;
+  transform: translateY(-2px);
+}
+
+.button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+button {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  width: 100%;
+}
+
+button:hover {
+  background-color: #5a52e0;
+  transform: translateY(-2px);
+}
+
+.secondary-button {
+  background-color: #6c757d;
+}
+
+.secondary-button:hover {
+  background-color: #5a6268;
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.results {
+  text-align: left;
+}
+
+.step-card {
+  background-color: var(--card-background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+.step-title {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--primary-color);
+  padding-bottom: 0.5rem;
+}
+
+.step-field {
+  margin-bottom: 1.5rem;
+}
+
+.step-key {
+  font-size: 1.1rem;
+  color: #555;
+  text-transform: capitalize;
+  margin-bottom: 0.5rem;
+}
+
+.question-container, .response-container {
+  background-color: var(--card-background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 12px var(--shadow-color);
+  text-align: left;
+}
+
+.question-container h2, .response-container h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--primary-color);
+  padding-bottom: 0.5rem;
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding: 2rem 1rem;
+  }
+
+  .card {
+    padding: 2.5rem;
+  }
+
+  .file-inputs {
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  .file-label {
+    width: auto;
+  }
+
+  .button-container {
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  button {
+    width: auto;
+  }
+
+  .step-card {
+    padding: 2.5rem;
+  }
+
+  .step-title {
+    font-size: 1.8rem;
+  }
+
+  .step-key {
+    font-size: 1.2rem;
+  }
+
+  .question-container, .response-container {
+    padding: 2.5rem;
+  }
+
+  .question-container h2, .response-container h2 {
+    font-size: 1.8rem;
+  }
 }
