@@ -7,13 +7,41 @@
 }
 
 :root {
-  --primary-color: #03030c;
-  --secondary-color: #f2f2f2;
-  --text-color: #333;
-  --background-color: #f9f9f9;
-  --card-background-color: #ffffff;
-  --border-color: #e0e0e0;
-  --shadow-color: rgba(0, 0, 0, 0.05);
+  --primary-color-light: #03030c;
+  --secondary-color-light: #f2f2f2;
+  --text-color-light: #333;
+  --background-color-light: #f9f9f9;
+  --card-background-color-light: #ffffff;
+  --border-color-light: #e0e0e0;
+  --shadow-color-light: rgba(0, 0, 0, 0.05);
+
+  --primary-color-dark: #BB86FC;
+  --secondary-color-dark: #2a2a2a;
+  --text-color-dark: #f2f2f2;
+  --background-color-dark: #1a1a1a;
+  --card-background-color-dark: #2a2a2a;
+  --border-color-dark: #444;
+  --shadow-color-dark: rgba(255, 255, 255, 0.05);
+}
+
+body[data-theme='light'] {
+  --primary-color: var(--primary-color-light);
+  --secondary-color: var(--secondary-color-light);
+  --text-color: var(--text-color-light);
+  --background-color: var(--background-color-light);
+  --card-background-color: var(--card-background-color-light);
+  --border-color: var(--border-color-light);
+  --shadow-color: var(--shadow-color-light);
+}
+
+body[data-theme='dark'] {
+  --primary-color: var(--primary-color-dark);
+  --secondary-color: var(--secondary-color-dark);
+  --text-color: var(--text-color-dark);
+  --background-color: var(--background-color-dark);
+  --card-background-color: var(--card-background-color-dark);
+  --border-color: var(--border-color-dark);
+  --shadow-color: var(--shadow-color-dark);
 }
 
 body {
@@ -22,6 +50,7 @@ body {
   color: var(--text-color);
   margin: 0;
   padding: 0 1rem;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 h1,
@@ -32,10 +61,10 @@ h2 {
 
 h1 {
   font-size: 2.5rem;
-  color: var(--primary-color);
+  color: var(--text-color);
 }
 
 h2 {
   font-size: 1.8rem;
-  color: #444;
+  color: var(--text-color);
 }

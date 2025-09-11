@@ -1,36 +1,124 @@
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import ImageModal from './ImageModal';
 
-const Step = ({ step, index }) => {
+const Step = ({ step, index, images }) => {
+  const [modalImage, setModalImage] = useState(null);
+  const [beforeImageIndex, setBeforeImageIndex] = useState(0);
+  const [afterImageIndex, setAfterImageIndex] = useState(0);
+  const [copiedField, setCopiedField] = useState(null);
 
-  // A helper function to render any value. It handles objects by turning them into formatted JSON strings.
-  const renderValue = (value) => {
-    if (typeof value === 'string') {
-      // Return the string directly, wrapped in a <pre> tag to preserve whitespace and formatting.
-      return <pre>{value}</pre>;
-    }
-    if (typeof value === 'object' && value !== null) {
-      // If the value is an object or array, format it as a JSON string with indentation for readability.
-      return <pre>{JSON.stringify(value, null, 2)}</pre>;
-    }
-    // For any other type (number, boolean, etc.), convert it to a string and wrap in a <pre> tag.
-    return <pre>{String(value)}</pre>;
+  useEffect(() => {
+    setBeforeImageIndex(0);
+    setAfterImageIndex(0);
+  }, [images]);
+
+  const handleCopy = (value, field) => {
+    navigator.clipboard.writeText(JSON.stringify(value, null, 2));
+    setCopiedField(field);
+    setTimeout(() => {
+      setCopiedField(null);
+    }, 2000);
   };
 
-  // An array of fields that we want to display from the step object.
+  const renderValue = (value, field) => {
+    const isCopyable = ['tool_code', 'tool_output'].includes(field);
+    const isThought = field === 'thought';
+
+    let content;
+    if (typeof value === 'string') {
+      content = <pre>{value}</pre>;
+    }
+    if (typeof value === 'object' && value !== null) {
+      content = <pre>{JSON.stringify(value, null, 2)}</pre>;
+    }
+    if(content == null) {
+        content = <pre>{String(value)}</pre>;
+    }
+
+    return (
+        <div className={`value-wrapper ${isThought ? 'thought-field' : ''}`}>
+            {isCopyable && (
+                <button className="copy-button" onClick={() => handleCopy(value, field)}>
+                {copiedField === field ? 'Copied!' : 'Copy'}
+                </button>
+            )}
+            {content}
+        </div>
+    );
+  };
+
   const fieldsToDisplay = ['thought', 'code', 'code_output', 'tool_code', 'tool_name', 'tool_output'];
+
+  const handleNextBefore = () => {
+    if (images && images.before) {
+      setBeforeImageIndex((prevIndex) => (prevIndex + 1) % images.before.length);
+    }
+  };
+
+  const handlePrevBefore = () => {
+    if (images && images.before) {
+      setBeforeImageIndex((prevIndex) => (prevIndex - 1 + images.before.length) % images.before.length);
+    }
+  };
+
+  const handleNextAfter = () => {
+    if (images && images.after) {
+      setAfterImageIndex((prevIndex) => (prevIndex + 1) % images.after.length);
+    }
+  };
+
+  const handlePrevAfter = () => {
+    if (images && images.after) {
+      setAfterImageIndex((prevIndex) => (prevIndex - 1 + images.after.length) % images.after.length);
+    }
+  };
+
+  const currentBeforeImage = images?.before?.[beforeImageIndex];
+  const currentAfterImage = images?.after?.[afterImageIndex];
 
   return (
     <div className="step-card">
-      <h3>Step {index + 1}</h3>
+      <h3 className="step-title">Step {index}</h3>
+
+      {images && images.before?.length > 0 && images.after?.length > 0 ? (
+        <div className="image-container">
+          <div className="image-wrapper">
+            <div className="image-header">
+              {images.before.length > 1 && <button className="carousel-button" onClick={handlePrevBefore}>&#8249;</button>}
+              <div className="image-info">
+                <h3>{currentBeforeImage.name}</h3>
+                {images.before.length > 1 && <span className="carousel-counter">{beforeImageIndex + 1} of {images.before.length}</span>}
+              </div>
+              {images.before.length > 1 && <button className="carousel-button" onClick={handleNextBefore}>&#8250;</button>}
+            </div>
+            <img src={currentBeforeImage.url} alt={currentBeforeImage.name} onClick={() => setModalImage(currentBeforeImage.url)} />
+          </div>
+          <div className="image-wrapper">
+            <div className="image-header">
+              {images.after.length > 1 && <button className="carousel-button" onClick={handlePrevAfter}>&#8249;</button>}
+              <div className="image-info">
+                <h3>{currentAfterImage.name}</h3>
+                {images.after.length > 1 && <span className="carousel-counter">{afterImageIndex + 1} of {images.after.length}</span>}
+              </div>
+              {images.after.length > 1 && <button className="carousel-button" onClick={handleNextAfter}>&#8250;</button>}
+            </div>
+            <img src={currentAfterImage.url} alt={currentAfterImage.name} onClick={() => setModalImage(currentAfterImage.url)} />
+          </div>
+        </div>
+      ) : (
+        <p>No images provided for this step.</p>
+      )}
+
       {fieldsToDisplay.map(field => (
-        // We only render a section if the field exists and is not null/undefined.
         step[field] && (
           <div key={field} className="step-section">
-            <h4>{field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</h4>
-            {renderValue(step[field])}
+            <h4 className="step-key">{field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</h4>
+            {renderValue(step[field], field)}
           </div>
         )
       ))}
+      {modalImage && <ImageModal src={modalImage} alt="Enlarged view" onClose={() => setModalImage(null)} />}
     </div>
   );
 };
@@ -45,6 +133,16 @@ Step.propTypes = {
     tool_output: PropTypes.any,
   }).isRequired,
   index: PropTypes.number.isRequired,
+  images: PropTypes.shape({
+    before: PropTypes.arrayOf(PropTypes.shape({
+      url: PropTypes.string,
+      name: PropTypes.string,
+    })),
+    after: PropTypes.arrayOf(PropTypes.shape({
+      url: PropTypes.string,
+      name: PropTypes.string,
+    })),
+  }),
 };
 
 export default Step;

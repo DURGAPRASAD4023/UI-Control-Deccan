@@ -2,7 +2,7 @@
 pre {
   white-space: pre-wrap;       
   word-break: break-all;     
-  background-color: #f0f0f0;  
+  background-color: var(--secondary-color);  
   padding: 1rem;
   border-radius: 8px;
   font-family: 'Roboto Mono', monospace;
@@ -14,13 +14,13 @@ pre {
 
 .container {
   min-height: calc(100vh - 124px);
-  padding: 1rem 0;
+  padding: 1rem;
 }
 
 .card {
   background-color: var(--card-background-color);
   border-radius: 12px;
-  padding: 2rem;
+  padding: 1.5rem;
   box-shadow: 0 4px 12px var(--shadow-color);
   margin-bottom: 2rem;
   border: 1px solid var(--border-color);
@@ -121,9 +121,9 @@ button:hover {
 
 .step-key {
   font-size: 1.1rem;
-  color: #555;
   text-transform: capitalize;
   margin-bottom: 0.5rem;
+  font-weight: 600;
 }
 
 .question-container, .response-container {
@@ -143,6 +143,134 @@ button:hover {
   border-bottom: 2px solid var(--primary-color);
   padding-bottom: 0.5rem;
 }
+
+.image-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.image-wrapper {
+    text-align: center;
+    width: 100%;
+}
+
+.image-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.image-header button {
+  background-color: #6c757d;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.image-wrapper img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+
+.carousel-button {
+  background-color: #6c757d;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  border: none;
+  font-size: 1.5rem;
+  font-weight: 600;
+  width: auto;
+}
+
+.carousel-button:hover {
+  background-color: #5a6268;
+}
+
+.image-info {
+  text-align: center;
+}
+
+.carousel-counter {
+  font-size: 0.9rem;
+  color: var(--text-color);
+}
+
+.value-wrapper {
+  position: relative;
+}
+
+.copy-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background-color: #6c757d;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  border: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  width: auto;
+}
+
+.copy-button:hover {
+  background-color: #5a6268;
+}
+
+.thought-field pre {
+  background-color: var(--secondary-color);
+  border-left: 4px solid var(--primary-color);
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: var(--card-background-color);
+  box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.navbar-logo {
+  height: 30px;
+  margin-right: 0.5rem;
+}
+
+.theme-toggle {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    padding: 0;
+    width: auto;
+}
+
 
 @media (min-width: 768px) {
   .container {
@@ -189,5 +317,29 @@ button:hover {
 
   .question-container h2, .response-container h2 {
     font-size: 1.8rem;
+  }
+
+  .image-container {
+    flex-direction: row;
+    justify-content: center;
+    gap: 1rem;
+  }
+
+  .image-wrapper img {
+    max-width: 560px;
+    box-shadow: 0 4px 12px var(--shadow-color);
+  }
+
+  .navbar {
+    padding: 1rem 2rem;
+  }
+
+  .navbar-brand {
+    font-size: 1.5rem;
+  }
+
+  .navbar-logo {
+    height: 40px;
+    margin-right: 0.75rem;
   }
 }
