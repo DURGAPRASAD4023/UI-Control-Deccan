@@ -11,3 +11,19 @@
 .navbar-logo img {
   height: 45px;
 }
+
+.logout-btn {
+  margin-left: 0.5rem;
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  background: #e63946;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background: #d62828;
+}
+
