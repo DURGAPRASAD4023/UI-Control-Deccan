@@ -384,7 +384,7 @@ function App({ onLogout }) {
 
           {parsedData && parsedData.steps && (
             <div className="results">
-              <h2>Parsed Steps</h2>
+              <h2>Parsed Steps -</h2>
               {Array.isArray(parsedData.steps) ? (
                 parsedData.steps.map((step, index) => (
                   <Step key={index} step={step} index={index} images={images[index]} />
