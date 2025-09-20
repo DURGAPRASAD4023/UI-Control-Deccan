@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import JSZip from 'jszip';
 import Navbar from './components/Navbar';
 import Step from './components/Step';
 import Loader from './components/Loader';
@@ -35,8 +36,8 @@ function App() {
   };
 
   const handleFileChange = (event) => {
-    const files = event.target.files;
-    if (files.length > 0) {
+    const file = event.target.files[0];
+    if (file) {
       setLoading(true);
       setParsedData(null);
       setQuestion(null);
@@ -44,101 +45,105 @@ function App() {
       setImages({});
       setFileName('');
 
-      const jsonFile = Array.from(files).find(file => file.name.endsWith('.json'));
-      const imageFiles = Array.from(files).filter(file => /\.(png|jpg|jpeg|gif)$/i.test(file.name));
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        JSZip.loadAsync(e.target.result).then(async (zip) => {
+          const jsonFile = Object.values(zip.files).find(f => f.name.endsWith('.json'));
+          const imageFiles = Object.values(zip.files).filter(f => /\.(png|jpg|jpeg|gif)$/i.test(f.name));
 
-      const imageMap = { before: {}, after: {} };
-      for (const imageFile of imageFiles) {
-        const name = imageFile.name.toLowerCase();
-        const typeMatch = name.match(/before|after/);
-        const numberMatch = name.match(/\d+(?!.*\d)/);
+          const imageMap = { before: {}, after: {} };
+          for (const imageFile of imageFiles) {
+            const name = imageFile.name.toLowerCase();
+            const typeMatch = name.match(/before|after/);
+            const numberMatch = name.match(/\d+(?!.*\d)/);
 
-        if (typeMatch && numberMatch) {
-            const type = typeMatch[0];
-            const number = parseInt(numberMatch[0], 10);
-            if(!imageMap[type][number]) {
-                 imageMap[type][number] = {
-                    url: URL.createObjectURL(imageFile),
-                    name: imageFile.name,
-                };
+            if (typeMatch && numberMatch) {
+                const type = typeMatch[0];
+                const number = parseInt(numberMatch[0], 10);
+                if(!imageMap[type][number]) {
+                    const blob = await imageFile.async('blob');
+                    imageMap[type][number] = {
+                        url: URL.createObjectURL(blob),
+                        name: imageFile.name,
+                    };
+                }
             }
-        }
-      }
+          }
 
-      if (jsonFile) {
-        setFileName(jsonFile.name);
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          setTimeout(() => {
-            try {
-              const initialData = JSON.parse(e.target.result);
-              const processedData = recursivelyParseJson(initialData);
-              const newImages = {};
+          if (jsonFile) {
+            setFileName(jsonFile.name);
+            const jsonContent = await jsonFile.async('string');
+            setTimeout(() => {
+              try {
+                const initialData = JSON.parse(jsonContent);
+                const processedData = recursivelyParseJson(initialData);
+                const newImages = {};
 
-              if (processedData.steps && Array.isArray(processedData.steps)) {
-                processedData.steps.forEach((step, index) => {
-                  const stepImages = { before: [], after: [] };
-                  let codeOutput = step.code_output;
+                if (processedData.steps && Array.isArray(processedData.steps)) {
+                  processedData.steps.forEach((step, index) => {
+                    const stepImages = { before: [], after: [] };
+                    let codeOutput = step.code_output;
 
-                  if (codeOutput && typeof codeOutput === 'string') {
-                    const rangeRegex = /(\d+)[_.-]?(before|after)[_.-]?image to (\d+)[_.-]?(before|after)[_.-]?image/gi;
-                    let match;
+                    if (codeOutput && typeof codeOutput === 'string') {
+                      const rangeRegex = /(\d+)[_.-]?(before|after)[_.-]?image to (\d+)[_.-]?(before|after)[_.-]?image/gi;
+                      let match;
 
-                    let mutableCodeOutput = codeOutput;
+                      let mutableCodeOutput = codeOutput;
 
-                    while ((match = rangeRegex.exec(codeOutput)) !== null) {
-                      const start = parseInt(match[1], 10);
-                      const type1 = match[2].toLowerCase();
-                      const end = parseInt(match[3], 10);
-                      const type2 = match[4].toLowerCase();
+                      while ((match = rangeRegex.exec(codeOutput)) !== null) {
+                        const start = parseInt(match[1], 10);
+                        const type1 = match[2].toLowerCase();
+                        const end = parseInt(match[3], 10);
+                        const type2 = match[4].toLowerCase();
 
-                      if (type1 === type2) {
-                        for (let i = start; i <= end; i++) {
-                            const image = imageMap[type1][i];
-                            if (image && !stepImages[type1].some(img => img.name === image.name)) {
-                                stepImages[type1].push(image);
-                            }
+                        if (type1 === type2) {
+                          for (let i = start; i <= end; i++) {
+                              const image = imageMap[type1][i];
+                              if (image && !stepImages[type1].some(img => img.name === image.name)) {
+                                  stepImages[type1].push(image);
+                              }
+                          }
                         }
+                        mutableCodeOutput = mutableCodeOutput.replace(match[0], '');
                       }
-                      mutableCodeOutput = mutableCodeOutput.replace(match[0], '');
+
+                      const individualImageRegex = /(\d+)[_.-]?(before|after)[_.-]?image/gi;
+                      while ((match = individualImageRegex.exec(mutableCodeOutput)) !== null) {
+                          const number = parseInt(match[1], 10);
+                          const type = match[2].toLowerCase();
+                          
+                          const image = imageMap[type][number];
+                          if (image && !stepImages[type].some(img => img.name === image.name)) {
+                              stepImages[type].push(image);
+                          }
+                      }
                     }
 
-                    const individualImageRegex = /(\d+)[_.-]?(before|after)[_.-]?image/gi;
-                    while ((match = individualImageRegex.exec(mutableCodeOutput)) !== null) {
-                        const number = parseInt(match[1], 10);
-                        const type = match[2].toLowerCase();
-                        
-                        const image = imageMap[type][number];
-                        if (image && !stepImages[type].some(img => img.name === image.name)) {
-                            stepImages[type].push(image);
-                        }
+                    if (stepImages.before.length > 0 || stepImages.after.length > 0) {
+                      stepImages.before.sort((a, b) => a.name.localeCompare(b.name));
+                      stepImages.after.sort((a, b) => a.name.localeCompare(b.name));
+                      newImages[index] = stepImages;
                     }
-                  }
-
-                  if (stepImages.before.length > 0 || stepImages.after.length > 0) {
-                    stepImages.before.sort((a, b) => a.name.localeCompare(b.name));
-                    stepImages.after.sort((a, b) => a.name.localeCompare(b.name));
-                    newImages[index] = stepImages;
-                  }
-                });
+                  });
+                }
+                
+                setImages(newImages);
+                setParsedData(processedData);
+                setQuestion(processedData.question || null);
+                setResponse(processedData.response_to_user || null);
+              } catch (error) {
+                console.error("Error parsing JSON:", error);
+                alert("Invalid JSON file. Please ensure it is a valid JSON file and try again.");
               }
-              
-              setImages(newImages);
-              setParsedData(processedData);
-              setQuestion(processedData.question || null);
-              setResponse(processedData.response_to_user || null);
-            } catch (error) {
-              console.error("Error parsing JSON:", error);
-              alert("Invalid JSON file. Please ensure it is a valid JSON file and try again.");
-            }
+              setLoading(false);
+            }, 2000);
+          } else {
+            alert("No JSON file found in the selected zip archive.");
             setLoading(false);
-          }, 2000);
-        };
-        reader.readAsText(jsonFile);
-      } else {
-        alert("No JSON file found in the selected directory.");
-        setLoading(false);
-      }
+          }
+        });
+      };
+      reader.readAsArrayBuffer(file);
     }
   };
 
@@ -178,9 +183,9 @@ function App() {
           {!parsedData ? (
             <div className="file-inputs">
               <div className="file-input-container">
-                <input type="file" id="fileInput" onChange={handleFileChange} webkitdirectory="true" />
+                <input type="file" id="fileInput" onChange={handleFileChange} accept=".zip" />
                 <label htmlFor="fileInput" className="file-label">
-                  {'Upload Folder'}
+                  {'Upload Zip File'}
                 </label>
               </div>
             </div>
@@ -211,10 +216,14 @@ function App() {
               )}
             </div>
           )}
-          {response && (
+          {parsedData && (
             <div className="response-container">
               <h2>Final Response</h2>
-              <pre className="response-content">{typeof response === 'object' ? JSON.stringify(response, null, 2) : response}</pre>
+              {response ? (
+                <pre className="response-content">{typeof response === 'object' ? JSON.stringify(response, null, 2) : response}</pre>
+              ) : (
+                <p>No final response was generated.</p>
+              )}
             </div>
           )}
         </div>
