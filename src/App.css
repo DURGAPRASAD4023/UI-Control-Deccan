@@ -17,7 +17,7 @@ pre {
 .container {
   min-height: calc(100vh - 140px);
   padding: 2rem;
-  max-width: 1200px;
+  max-width: 1500px;
   margin: 0 auto;
 }
 
@@ -170,7 +170,7 @@ button:hover {
 .image-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 2rem;
+    gap: 1.5rem;
     justify-content: center;
     margin-top: 2rem;
 }
@@ -215,21 +215,6 @@ button:hover {
   position: relative;
 }
 
-.copy-button {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background-color: #555;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border: none;
-  font-size: 0.9rem;
-  width: auto;
-}
-
 .thought-field pre {
   border-left: 5px solid var(--primary-color);
 }
@@ -254,6 +239,6 @@ button:hover {
   }
 
   .image-wrapper {
-    width: calc(50% - 2rem);
+    width: calc(50% - 1.5rem);
   }
 }

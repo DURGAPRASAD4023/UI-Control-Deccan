@@ -6,23 +6,13 @@ const Step = ({ step, index, images }) => {
   const [modalImage, setModalImage] = useState(null);
   const [beforeImageIndex, setBeforeImageIndex] = useState(0);
   const [afterImageIndex, setAfterImageIndex] = useState(0);
-  const [copiedField, setCopiedField] = useState(null);
 
   useEffect(() => {
     setBeforeImageIndex(0);
     setAfterImageIndex(0);
   }, [images]);
 
-  const handleCopy = (value, field) => {
-    navigator.clipboard.writeText(JSON.stringify(value, null, 2));
-    setCopiedField(field);
-    setTimeout(() => {
-      setCopiedField(null);
-    }, 2000);
-  };
-
   const renderValue = (value, field) => {
-    const isCopyable = ['tool_code', 'tool_output', 'code'].includes(field);
     const isThought = field === 'thought';
 
     let content;
@@ -36,11 +26,6 @@ const Step = ({ step, index, images }) => {
 
     return (
       <div className={`value-wrapper ${isThought ? 'thought-field' : ''}`}>
-        {isCopyable && (
-          <button className="copy-button" onClick={() => handleCopy(value, field)}>
-            {copiedField === field ? 'Copied!' : 'Copy'}
-          </button>
-        )}
         {content}
       </div>
     );
