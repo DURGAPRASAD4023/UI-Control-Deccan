@@ -10,7 +10,6 @@ const Navbar = ({ onLogout, userProfile }) => {
     <nav className="navbar">
       <div className="navbar-brand">
         <img src={deccanAiLogo} alt="Logo" className="navbar-logo" />
-        <span className="navbar-title">Agent Task Explorer</span>
       </div>
 
       <div className="navbar-actions">

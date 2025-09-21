@@ -169,11 +169,9 @@ button:hover {
 
 .image-container {
     display: flex;
-    flex-direction: row;
     flex-wrap: wrap;
+    gap: 2rem;
     justify-content: center;
-    align-items: center;
-    gap: 1.5rem;
     margin-top: 2rem;
 }
 
@@ -253,5 +251,9 @@ button:hover {
   .drive-link-container {
     flex-direction: row;
     max-width: 500px;
+  }
+
+  .image-wrapper {
+    width: calc(50% - 2rem);
   }
 }
