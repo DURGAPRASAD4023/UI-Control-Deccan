@@ -7,7 +7,7 @@ import Footer from './components/Footer';
 import './App.css';
 
 
-function App({ onLogout }) {
+function App({ onLogout, userProfile }) {
   const [parsedData, setParsedData] = useState(null);
   const [fileName, setFileName] = useState('');
   const [question, setQuestion] = useState(null);
@@ -336,7 +336,7 @@ function App({ onLogout }) {
   
   return (
     <div>
-      <Navbar onLogout={onLogout} />
+      <Navbar onLogout={onLogout} userProfile={userProfile} />
       {loading && <Loader />}
       <div className="container">
         <h1>Agent Task Explorer</h1>

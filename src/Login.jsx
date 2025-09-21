@@ -1,48 +1,43 @@
 import { useGoogleLogin } from "@react-oauth/google";
 import { useState, useEffect } from "react";
 import App from "./App";
+import './Login.css';
+import googleIcon from './assets/google-icon.svg';
 
 export default function LoginPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userProfile, setUserProfile] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem("google_access_token");
-    if (token) setIsLoggedIn(true);
+    const profile = localStorage.getItem("google_user_profile");
+    if (token && profile) {
+      setIsLoggedIn(true);
+      setUserProfile(JSON.parse(profile));
+    }
   }, []);
-
-  // const login = useGoogleLogin({
-  //   flow: "implicit",  
-  //   scope: "https://www.googleapis.com/auth/drive.readonly",
-  //   hosted_domain: "deccan.ai",
-  //   onSuccess: (tokenResponse) => {
-  //     localStorage.setItem("google_access_token", tokenResponse.access_token);
-  //     setIsLoggedIn(true);
-  //   },
-  //   onError: () => alert("Login failed"),
-  // });
 
   const login = useGoogleLogin({
     flow: "implicit",
-    scope: "https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/userinfo.email",
+    scope: "https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email",
     onSuccess: async (tokenResponse) => {
       try {
-        // Get user info from Google's API
         const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
           headers: {
             'Authorization': `Bearer ${tokenResponse.access_token}`
           }
         });
         const userInfo = await userInfoResponse.json();
-        const userDomain = userInfo.hd; // 'hd' is the hosted domain property
+        const userDomain = userInfo.hd;
         
         const allowedDomains = ["deccan.ai", "getdeccan.ai"];
   
         if (allowedDomains.includes(userDomain)) {
-          // User is from an allowed domain
           localStorage.setItem("google_access_token", tokenResponse.access_token);
+          localStorage.setItem("google_user_profile", JSON.stringify(userInfo));
+          setUserProfile(userInfo);
           setIsLoggedIn(true);
         } else {
-          // User is not from an allowed domain
           alert("Login failed: Your email domain is not permitted.");
         }
       } catch (error) {
@@ -54,38 +49,22 @@ export default function LoginPage() {
 
   const handleLogout = () => {
     localStorage.removeItem("google_access_token");
+    localStorage.removeItem("google_user_profile");
     setIsLoggedIn(false);
+    setUserProfile(null);
   };
 
   if (isLoggedIn) {
-    return <App onLogout={handleLogout} />; 
+    return <App onLogout={handleLogout} userProfile={userProfile} />; 
   }
 
   return (
-    <div
-  style={{
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    marginTop: "100px",
-  }}
->
-  <h1>Welcome to Agent Task Explorer</h1>
-  <button
-    onClick={() => login()}
-    style={{
-      padding: "10px 20px",
-      fontSize: "1rem",
-      borderRadius: "6px",
-      backgroundColor: "#000",   
-      color: "#fff",           
-      border: "none",
-      cursor: "pointer",
-    }}
-  >
-    Login with Google
-  </button>
-</div>
-
+    <div className="login-container">
+      <h1 className="login-title">Welcome to Agent Task Explorer</h1>
+      <button onClick={() => login()} className="login-button">
+        <img src={googleIcon} alt="Google icon" className="google-icon" />
+        <span>Login with Google</span>
+      </button>
+    </div>
   );
 }
