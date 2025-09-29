@@ -80,29 +80,45 @@ const Step = ({ step, index, images }) => {
     <div className="step-card">
       <h3 className="step-title">Step {index}</h3>
 
-      {images && images.before?.length > 0 && images.after?.length > 0 ? (
+      {images && (images.before?.length > 0 || images.after?.length > 0) ? (
         <div className="image-container">
           <div className="image-wrapper">
-            <div className="image-header">
-              {images.before.length > 1 && <button className="carousel-button" onClick={handlePrevBefore}>&#8249;</button>}
-              <div className="image-info">
-                <h3>{beforeImageName}</h3>
-                {images.before.length > 1 && <span className="carousel-counter">{beforeImageIndex + 1} of {images.before.length}</span>}
+            {images.before?.length > 0 ? (
+              <>
+                <div className="image-header">
+                  {images.before.length > 1 && <button className="carousel-button" onClick={handlePrevBefore}>&#8249;</button>}
+                  <div className="image-info">
+                    <h3>{beforeImageName}</h3>
+                    {images.before.length > 1 && <span className="carousel-counter">{beforeImageIndex + 1} of {images.before.length}</span>}
+                  </div>
+                  {images.before.length > 1 && <button className="carousel-button" onClick={handleNextBefore}>&#8250;</button>}
+                </div>
+                <img src={currentBeforeImage.url} alt={beforeImageName} onClick={() => setModalImage(currentBeforeImage.url)} />
+              </>
+            ) : (
+              <div className="no-image-placeholder">
+                <p>Before image is not provided</p>
               </div>
-              {images.before.length > 1 && <button className="carousel-button" onClick={handleNextBefore}>&#8250;</button>}
-            </div>
-            <img src={currentBeforeImage.url} alt={currentBeforeImage.name} onClick={() => setModalImage(currentBeforeImage.url)} />
+            )}
           </div>
           <div className="image-wrapper">
-            <div className="image-header">
-              {images.after.length > 1 && <button className="carousel-button" onClick={handlePrevAfter}>&#8249;</button>}
-              <div className="image-info">
-                <h3>{afterImageName}</h3>
-                {images.after.length > 1 && <span className="carousel-counter">{afterImageIndex + 1} of {images.after.length}</span>}
+            {images.after?.length > 0 ? (
+              <>
+                <div className="image-header">
+                  {images.after.length > 1 && <button className="carousel-button" onClick={handlePrevAfter}>&#8249;</button>}
+                  <div className="image-info">
+                    <h3>{afterImageName}</h3>
+                    {images.after.length > 1 && <span className="carousel-counter">{afterImageIndex + 1} of {images.after.length}</span>}
+                  </div>
+                  {images.after.length > 1 && <button className="carousel-button" onClick={handleNextAfter}>&#8250;</button>}
+                </div>
+                <img src={currentAfterImage.url} alt={afterImageName} onClick={() => setModalImage(currentAfterImage.url)} />
+              </>
+            ) : (
+              <div className="no-image-placeholder">
+                <p>After image is not provided</p>
               </div>
-              {images.after.length > 1 && <button className="carousel-button" onClick={handleNextAfter}>&#8250;</button>}
-            </div>
-            <img src={currentAfterImage.url} alt={currentAfterImage.name} onClick={() => setModalImage(currentAfterImage.url)} />
+            )}
           </div>
         </div>
       ) : (

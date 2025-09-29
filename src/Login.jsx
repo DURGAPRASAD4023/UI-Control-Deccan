@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import App from "./App";
 import './Login.css';
 import googleIcon from './assets/google-icon.svg';
+import deccanAiLogo from './assets/deccan-ai-logo.png';
 
 export default function LoginPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -60,7 +61,9 @@ export default function LoginPage() {
 
   return (
     <div className="login-container">
+      <img src={deccanAiLogo} alt="Deccan AI Logo" className="login-logo" />
       <h1 className="login-title">Welcome to Agent Task Explorer</h1>
+      <p className="login-subtitle">Your tool for analyzing and exploring agent tasks.</p>
       <button onClick={() => login()} className="login-button">
         <img src={googleIcon} alt="Google icon" className="google-icon" />
         <span>Login with Google</span>

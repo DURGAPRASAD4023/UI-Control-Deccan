@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import JSZip from 'jszip';
 import Navbar from './components/Navbar';
 import Step from './components/Step';
 import Loader from './components/Loader';
 import Footer from './components/Footer';
+import ErrorNotification from './components/ErrorNotification';
 import './App.css';
+import driveIcon from './assets/google-drive-icon.svg';
 
 
 function App({ onLogout, userProfile }) {
@@ -15,6 +17,10 @@ function App({ onLogout, userProfile }) {
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState({});
   const [driveLink, setDriveLink] = useState("")
+  const [error, setError] = useState(null);
+  const fileInputRef = useRef(null);
+  const [showDriveInput, setShowDriveInput] = useState(false);
+
 
   const recursivelyParseJson = (data) => {
     if (typeof data === 'string') {
@@ -46,6 +52,7 @@ function App({ onLogout, userProfile }) {
       setResponse(null);
       setImages({});
       setFileName('');
+      setError(null);
 
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -119,6 +126,20 @@ function App({ onLogout, userProfile }) {
                               stepImages[type].push(image);
                           }
                       }
+					  const imageNumberRegex = /image_(\d+)/gi;
+                      while ((match = imageNumberRegex.exec(mutableCodeOutput)) !== null) {
+                        const number = parseInt(match[1], 10);
+                        
+                        const beforeImage = imageMap['before'][number];
+                        if (beforeImage && !stepImages['before'].some(img => img.name === beforeImage.name)) {
+                          stepImages['before'].push(beforeImage);
+                        }
+                
+                        const afterImage = imageMap['after'][number];
+                        if (afterImage && !stepImages['after'].some(img => img.name === afterImage.name)) {
+                          stepImages['after'].push(afterImage);
+                        }
+                      }
                     }
 
                     if (stepImages.before.length > 0 || stepImages.after.length > 0) {
@@ -135,12 +156,12 @@ function App({ onLogout, userProfile }) {
                 setResponse(processedData.response_to_user || null);
               } catch (error) {
                 console.error("Error parsing JSON:", error);
-                alert("Invalid JSON file. Please ensure it is a valid JSON file and try again.");
+                setError("Invalid JSON file. Please ensure it is a valid JSON file and try again.");
               }
               setLoading(false);
             }, 2000);
           } else {
-            alert("No JSON file found in the selected zip archive.");
+            setError("No JSON file found in the selected zip archive.");
             setLoading(false);
           }
         });
@@ -171,6 +192,7 @@ function App({ onLogout, userProfile }) {
     setQuestion(null);
     setResponse(null);
     setImages({});
+    setError(null);
     const fileInput = document.getElementById('fileInput');
     if (fileInput) {
         fileInput.value = '';
@@ -185,11 +207,14 @@ function App({ onLogout, userProfile }) {
       setResponse(null);
       setImages({});
       setFileName("");
+      setError(null);
   
       const accessToken = localStorage.getItem("google_access_token");
-      if (!accessToken) return alert("You must login first to access Drive");
+      if (!accessToken) {
+        setError("You must login first to access Drive");
+        return;
+      }
   
-      // Fetch blobs for all files
       const fileBlobs = await Promise.all(
         files.map(async (file) => {
           const res = await fetch(`https://www.googleapis.com/drive/v3/files/${file.id}?alt=media`, {
@@ -201,7 +226,6 @@ function App({ onLogout, userProfile }) {
         })
       );
   
-      // Separate JSON and images
       const jsonFile = fileBlobs.find(f => f.name.endsWith(".json"));
       const imageFiles = fileBlobs.filter(f => /\.(png|jpg|jpeg|gif)$/i.test(f.name));
   
@@ -266,6 +290,20 @@ function App({ onLogout, userProfile }) {
                   stepImages[type].push(image);
                 }
               }
+			  const imageNumberRegex = /image_(\d+)/gi;
+			  while ((match = imageNumberRegex.exec(mutableCodeOutput)) !== null) {
+				const number = parseInt(match[1], 10);
+				
+				const beforeImage = imageMap['before'][number];
+				if (beforeImage && !stepImages['before'].some(img => img.name === beforeImage.name)) {
+				  stepImages['before'].push(beforeImage);
+				}
+		
+				const afterImage = imageMap['after'][number];
+				if (afterImage && !stepImages['after'].some(img => img.name === afterImage.name)) {
+				  stepImages['after'].push(afterImage);
+				}
+			  }
             }
   
             if (stepImages.before.length > 0 || stepImages.after.length > 0) {
@@ -281,11 +319,11 @@ function App({ onLogout, userProfile }) {
         setQuestion(processedData.question || null);
         setResponse(processedData.response_to_user || null);
       } else {
-        alert("No JSON file found in the Drive folder.");
+        setError("No JSON file found in the Drive folder.");
       }
     } catch (err) {
       console.error(err);
-      alert(err.message);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -295,23 +333,37 @@ function App({ onLogout, userProfile }) {
   
 
   const handleFetchDrive = async () => {
-    if (!driveLink) return alert("Please paste a Google Drive folder link");
+    if (!driveLink) {
+      setError("Please paste a Google Drive folder link");
+      return;
+    }
   
     const folderIdMatch = driveLink.match(/[-\w]{25,}/);
     const folderId = folderIdMatch ? folderIdMatch[0] : null;
-    if (!folderId) return alert("Invalid Drive folder link");
+    if (!folderId) {
+      setError("Invalid Drive folder link");
+      return;
+    }
   
     const accessToken = localStorage.getItem("google_access_token");
-    if (!accessToken) return alert("You must login first to access Drive");
+    if (!accessToken) {
+      setError("You must login first to access Drive");
+      return;
+    }
   
     try {
       setLoading(true);
+      setError(null);
   
       const response = await fetch(
         `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents&fields=files(id,name)`,
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
   
+      if (response.status === 401) {
+        onLogout();
+        return;
+      }
       if (!response.ok) throw new Error("Failed to fetch folder contents");
   
       const data = await response.json();
@@ -319,16 +371,17 @@ function App({ onLogout, userProfile }) {
   
       if (!files || files.length === 0) throw new Error("Folder is empty");
   
-      console.log("Fetched files:", files.map(f => f.name));
-  
-      await handleDriveFiles(files); // <-- process the Drive files directly
+      await handleDriveFiles(files);
     } catch (err) {
       console.error(err);
-      alert(err.message);
+      setError(err.message);
       setLoading(false);
     }
   };
-  
+
+  const handleDriveLinkClick = () => {
+    setShowDriveInput(!showDriveInput);
+};
   
   
   
@@ -336,43 +389,62 @@ function App({ onLogout, userProfile }) {
   
   return (
     <div>
-      <Navbar onLogout={onLogout} userProfile={userProfile} />
+      <Navbar 
+        onLogout={onLogout} 
+        userProfile={userProfile} 
+        onDownload={handleDownload} 
+        onReset={handleReset} 
+        isDataParsed={!!parsedData} 
+      />
       {loading && <Loader />}
+      <ErrorNotification message={error} onClose={() => setError(null)} />
       <div className="container">
         <h1>Agent Task Explorer</h1>
 
-        <div className="card">
-          {!parsedData ? (
+        {!parsedData && (
+          <div className="card">
             <div className="file-inputs">
-              <div className="file-input-container">
-                <input type="file" id="fileInput" onChange={handleFileChange} accept=".zip" />
-                <label htmlFor="fileInput" className="file-label">
-                  Upload Zip File
-                </label>
+              <div className="drive-link-container">
+                  <button onClick={handleDriveLinkClick} className="drive-link-btn">
+                    <img src={driveIcon} alt="Google Drive Icon" className="drive-icon" />
+                    Upload Drive Link
+                  </button>
+                  {showDriveInput && (
+                      <div className="drive-input-container">
+                          <input
+                              type="text"
+                              placeholder="Paste Google Drive link here"
+                              value={driveLink}
+                              onChange={(e) => setDriveLink(e.target.value)}
+                              className="drive-link-input"
+                          />
+                          <button onClick={handleFetchDrive} className="drive-fetch-btn">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                          </button>
+                      </div>
+                  )}
               </div>
 
-              <div className="drive-link-container">
-                <input
-                  type="text"
-                  placeholder="Paste Google Drive link here"
-                  value={driveLink}
-                  onChange={(e) => setDriveLink(e.target.value)}
-                  className="drive-link-input"
-                />
-                <button onClick={handleFetchDrive} className="drive-fetch-btn">
-                  Fetch from Drive
-                </button>
+              <div className="or-divider">
+                <span className="or-text">OR</span>
+              </div>
+
+              <div className="file-input-container">
+                  <input
+                    type="file"
+                    id="fileInput"
+                    ref={fileInputRef}
+                    style={{ display: 'none' }}
+                    onChange={handleFileChange}
+                    accept=".zip"
+                  />
+                  <button onClick={() => fileInputRef.current.click()} className="upload-zip-btn">
+                      Upload Zip File
+                  </button>
               </div>
             </div>
-          ) : (
-            <div className="button-container">
-              <button onClick={handleDownload}>Download Parsed JSON</button>
-              <button onClick={handleReset} className="secondary-button">
-                Parse Another File
-              </button>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
 
         <div className="main-content">
           {question && (

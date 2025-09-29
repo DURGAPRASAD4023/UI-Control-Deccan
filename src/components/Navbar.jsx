@@ -1,42 +1,43 @@
-import { useState } from 'react';
-import ThemeToggle from './ThemeToggle';
-import deccanAiLogo from '../assets/deccan-ai-logo.png';
+import React, { useState } from 'react';
 import './Navbar.css';
+import deccanAiLogo from '../assets/deccan-ai-logo.png';
+import ThemeToggle from './ThemeToggle';
+import ProfileSidebar from './ProfileSidebar';
 
-const Navbar = ({ onLogout, userProfile }) => {
-  const [isPanelOpen, setIsPanelOpen] = useState(false);
+const Navbar = ({ onLogout, userProfile, onDownload, onReset, isDataParsed }) => {
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!isSidebarOpen);
+  };
 
   return (
     <nav className="navbar">
-      <div className="navbar-brand">
-        <img src={deccanAiLogo} alt="Logo" className="navbar-logo" />
+      <div className="navbar-left">
+        <img src={deccanAiLogo} alt="Deccan AI Logo" className="navbar-logo" />
       </div>
-
-      <div className="navbar-actions">
+      <div className="navbar-right">
+        {isDataParsed && (
+          <div className="nav-buttons">
+            <button onClick={onDownload} className="nav-button">Download Parsed JSON</button>
+            <button onClick={onReset} className="nav-button secondary">Parse Another File</button>
+          </div>
+        )}
         <ThemeToggle />
         {userProfile && (
-          <div className="profile-container">
-            <img 
-              src={userProfile.picture} 
-              alt="Profile" 
-              className="profile-picture" 
-              onClick={() => setIsPanelOpen(true)}
-            />
-            <div className={`profile-panel ${isPanelOpen ? 'open' : ''}`}>
-              <button className="close-panel" onClick={() => setIsPanelOpen(false)}>x</button>
-              <div className="panel-content">
-                <img src={userProfile.picture} alt="Profile" className="panel-profile-pic" />
-                <p className="panel-name">{userProfile.name}</p>
-                <p className="panel-email">{userProfile.email}</p>
-                <button onClick={onLogout} className="logout-button-panel">
-                  Logout
-                </button>
-              </div>
-            </div>
-            {isPanelOpen && <div className="overlay" onClick={() => setIsPanelOpen(false)}></div>}
+          <div className="user-profile" onClick={toggleSidebar}>
+            <img src={userProfile.picture} alt="User avatar" className="avatar" />
           </div>
         )}
       </div>
+      {userProfile && (
+        <ProfileSidebar 
+          user={userProfile} 
+          onLogout={onLogout} 
+          isOpen={isSidebarOpen} 
+          onClose={toggleSidebar} 
+        />
+      )}
     </nav>
   );
 };

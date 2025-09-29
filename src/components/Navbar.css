@@ -5,141 +5,58 @@
   padding: 1rem 2rem;
   background-color: var(--card-background-color);
   box-shadow: 0 4px 12px var(--shadow-color);
-  position: relative;
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
   z-index: 1000;
 }
 
-.navbar-brand {
+.navbar-left {
   display: flex;
   align-items: center;
 }
 
 .navbar-logo {
-  height: 40px;
-  margin-right: 0.75rem;
+  width: 150px;
 }
 
-.navbar-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--text-color);
-}
-
-.navbar-actions {
+.navbar-right {
   display: flex;
   align-items: center;
   gap: 1.5rem;
 }
 
-.profile-container {
-  position: relative;
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
-.profile-picture {
+.avatar {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  cursor: pointer;
-  border: 2px solid var(--primary-color);
 }
 
-.profile-panel {
-  position: fixed;
-  top: 0;
-  right: -300px;
-  width: 300px;
-  height: 100%;
-  background-color: var(--card-background-color);
-  box-shadow: -4px 0 15px rgba(0,0,0,0.2);
-  transition: right 0.3s ease-in-out;
-  z-index: 1001;
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.profile-panel.open {
-  right: 0;
-}
-
-.close-panel {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: var(--text-color);
-}
-
-.panel-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 3rem;
-}
-
-.panel-profile-pic {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  margin-bottom: 1rem;
-}
-
-.panel-name {
-  font-size: 1.2rem;
+.user-name {
   font-weight: 600;
-  margin-bottom: 0.5rem;
-}
-
-.panel-email {
-  font-size: 0.9rem;
   color: var(--text-color);
-  margin-bottom: 2rem;
 }
 
-.logout-button-panel {
-  background: linear-gradient(45deg, #c0392b, #e74c3c);
-  color: white;
-  padding: 0.8rem 1.5rem;
-  border-radius: 50px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border: none;
-  font-size: 1rem;
+.nav-buttons {
+  display: flex;
+  gap: 1rem;
 }
 
-.logout-button-panel:hover {
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+.nav-button {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  border-radius: 20px;
 }
 
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.4);
-  z-index: 1000;
-}
-
-@media (max-width: 768px) {
-  .navbar {
-    padding: 1rem;
-  }
-  .navbar-title {
-    display: none;
-  }
-}
-
-@media (max-width: 480px) {
-  .navbar-logo {
-    height: 35px;
-  }
-  .profile-panel {
-    width: 250px;
-    right: -250px;
-  }
+.logout-button {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  border-radius: 20px;
+  background: #dc3545;
 }
